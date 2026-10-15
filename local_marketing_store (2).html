@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sadiq Yousafzai | Professional Community Marketplace & AI Hub</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                            800: '#065f46',
+                            900: '#064e3b',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+        }
+        .main-section {
+            display: none;
+        }
+        .main-section.active {
+            display: block;
+            animation: fadeInSection 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes fadeInSection {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between selection:bg-emerald-500 selection:text-white">
+
+    <div id="toast" class="fixed top-6 right-6 z-50 hidden bg-slate-900/95 text-white px-6 py-3.5 rounded-2xl shadow-2xl backdrop-blur-md flex items-center space-x-3 transition-all duration-300 border border-slate-700/80">
+        <i id="toast-icon" class="fas fa-check-circle text-emerald-400 text-lg"></i>
+        <span id="toast-msg" class="text-sm font-semibold tracking-wide">Notification message</span>
+    </div>
+
+    <header class="bg-slate-950 text-white shadow-xl sticky top-0 z-40 border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                
+                <!-- Logo & Brand Name -->
+                <div class="flex items-center space-x-3 cursor-pointer group" onclick="switchSection('store')">
+                    <div class="bg-gradient-to-tr from-emerald-500 to-teal-400 text-slate-950 p-3 rounded-2xl shadow-lg font-black text-xl group-hover:scale-105 transition-transform duration-300">
+                        <i class="fas fa-store-alt"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl sm:text-2xl font-black tracking-tight bg-gradient-to-r from-white via-emerald-100 to-emerald-300 bg-clip-text text-transparent">Sadiq Yousafzai</h1>
+                        <p class="text-[11px] text-emerald-400 font-medium tracking-wider uppercase">Professional E-Commerce & AI Suite</p>
+                    </div>
+                </div>
+
+                <!-- Global Search Bar for Desktop -->
+                <div class="hidden lg:flex items-center w-1/3 relative">
+                    <input type="text" id="desktop-search" oninput="handleGlobalSearch(this.value)" placeholder="Search products, categories, or ask AI..." 
+                           class="w-full pl-11 pr-4 py-2.5 rounded-2xl text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-100 border border-slate-700/50 shadow-inner transition">
+                    <i class="fas fa-search absolute left-4 text-slate-400 text-sm"></i>
+                </div>
+
+                <!-- Navigation Action Links -->
+                <div class="flex items-center space-x-3 sm:space-x-4">
+                    <!-- Cart Button with Badge -->
+                    <button onclick="switchSection('cart')" class="relative bg-slate-900 hover:bg-slate-800 text-slate-200 px-4 py-2.5 rounded-2xl font-bold text-sm flex items-center space-x-2 border border-slate-700 transition shadow-sm">
+                        <i class="fas fa-shopping-bag text-emerald-400"></i>
+                        <span class="hidden sm:inline">Cart</span>
+                        <span id="cart-badge" class="bg-emerald-500 text-slate-950 text-xs px-2 py-0.5 rounded-full font-black">0</span>
+                    </button>
+
+                    <!-- User Account / Profile Button -->
+                    <button onclick="switchSection('account')" id="nav-account-btn" class="bg-slate-900 hover:bg-slate-800 text-slate-200 px-4 py-2.5 rounded-2xl font-bold text-sm flex items-center space-x-2 border border-slate-700 transition shadow-sm">
+                        <i class="fas fa-user-circle text-emerald-400"></i>
+                        <span id="nav-user-label" class="hidden sm:inline">My Account</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Distinct Section Tab Navigation Bar -->
+            <div class="flex items-center space-x-2 sm:space-x-4 overflow-x-auto py-3 border-t border-slate-800 text-sm">
+                <button onclick="switchSection('store')" id="tab-btn-store" class="nav-tab px-4 py-2 rounded-xl font-bold flex items-center gap-2 transition bg-emerald-600 text-white shadow">
+                    <i class="fas fa-th-large"></i>
+                    <span>Store Catalog</span>
+                </button>
+                <button onclick="switchSection('cart')" id="tab-btn-cart" class="nav-tab px-4 py-2 rounded-xl font-medium flex items-center gap-2 transition text-slate-300 hover:bg-slate-900">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span>Cart & COD Checkout</span>
+                </button>
+                <button onclick="switchSection('orders')" id="tab-btn-orders" class="nav-tab px-4 py-2 rounded-xl font-medium flex items-center gap-2 transition text-slate-300 hover:bg-slate-900">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span>Order History & Tracking</span>
+                </button>
+                <button onclick="switchSection('ai')" id="tab-btn-ai" class="nav-tab px-4 py-2 rounded-xl font-bold flex items-center gap-2 transition text-amber-300 bg-emerald-950/80 border border-emerald-500/30 shadow-sm">
+                    <i class="fas fa-robot text-amber-400 animate-pulse"></i>
+                    <span>Gemini AI Assistant</span>
+                </button>
+                <button onclick="switchSection('account')" id="tab-btn-account" class="nav-tab px-4 py-2 rounded-xl font-medium flex items-center gap-2 transition text-slate-300 hover:bg-slate-900">
+                    <i class="fas fa-user-shield"></i>
+                    <span>Account Profile</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+
+        <!-- ======================================================== -->
+        <!-- SECTION 1: STORE CATALOG & PRODUCTS                       -->
+        <!-- ======================================================== -->
+        <section id="section-store" class="main-section active space-y-8">
+            
+            <!-- Professional Hero Banner -->
+            <div class="relative bg-gradient-to-r from-slate-900 via-emerald-950 to-slate-900 rounded-3xl p-8 sm:p-12 text-white shadow-2xl overflow-hidden border border-emerald-900/50">
+                <div class="relative z-10 max-w-2xl space-y-4">
+                    <div class="inline-flex items-center gap-2 bg-amber-400/20 text-amber-300 border border-amber-400/30 text-xs font-black px-4 py-1.5 rounded-full uppercase tracking-wider">
+                        <i class="fas fa-shield-alt"></i> Verified Local Sellers • 100% Cash on Delivery
+                    </div>
+                    <h2 class="text-3xl sm:text-5xl font-black tracking-tight leading-tight">Premium Community Goods, Delivered to Your Doorstep</h2>
+                    <p class="text-slate-300 text-base leading-relaxed">Discover top-rated electronics, artisan crafts, fashionable apparel, and organic groceries sourced directly from verified local merchants.</p>
+                    <div class="pt-2 flex flex-wrap gap-4">
+                        <button onclick="scrollToProducts()" class="bg-amber-400 hover:bg-amber-300 text-slate-950 px-8 py-3.5 rounded-2xl font-black text-sm shadow-xl transition transform hover:-translate-y-0.5">
+                            Browse Products Now
+                        </button>
+                        <button onclick="switchSection('ai')" class="bg-slate-800/90 hover:bg-slate-800 text-white px-6 py-3.5 rounded-2xl text-sm font-bold border border-slate-700 flex items-center gap-2 transition shadow-lg">
+                            <i class="fas fa-robot text-amber-400"></i>
+                            <span>Ask Gemini AI for Recommendations</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="absolute right-[-20px] bottom-[-40px] opacity-10 text-white text-[250px] pointer-events-none select-none">
+                    <i class="fas fa-shopping-bag"></i>
+                </div>
+            </div>
+
+            <!-- Category Filter Tabs -->
+            <div id="product-anchor" class="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-none pt-2">
+                <button onclick="filterCategory('all')" class="cat-btn active bg-emerald-600 text-white px-6 py-3 rounded-2xl text-sm font-bold whitespace-nowrap shadow-md transition">
+                    All Items
+                </button>
+                <button onclick="filterCategory('electronics')" class="cat-btn bg-white hover:bg-slate-100 text-slate-700 px-6 py-3 rounded-2xl text-sm font-bold whitespace-nowrap border border-slate-200 shadow-sm transition">
+                    <i class="fas fa-laptop text-emerald-600 mr-2"></i> Electronics & Gadgets
+                </button>
+                <button onclick="filterCategory('fashion')" class="cat-btn bg-white hover:bg-slate-100 text-slate-700 px-6 py-3 rounded-2xl text-sm font-bold whitespace-nowrap border border-slate-200 shadow-sm transition">
+                    <i class="fas fa-tshirt text-emerald-600 mr-2"></i> Fashion & Apparel
+                </button>
+                <button onclick="filterCategory('grocery')" class="cat-btn bg-white hover:bg-slate-100 text-slate-700 px-6 py-3 rounded-2xl text-sm font-bold whitespace-nowrap border border-slate-200 shadow-sm transition">
+                    <i class="fas fa-apple-alt text-emerald-600 mr-2"></i> Organic Grocery
+                </button>
+                <button onclick="filterCategory('crafts')" class="cat-btn bg-white hover:bg-slate-100 text-slate-700 px-6 py-3 rounded-2xl text-sm font-bold whitespace-nowrap border border-slate-200 shadow-sm transition">
+                    <i class="fas fa-paint-brush text-emerald-600 mr-2"></i> Local Artisan Crafts
+                </button>
+            </div>
+
+            <!-- Product Cards Grid -->
+            <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <!-- Dynamically rendered products -->
+            </div>
+        </section>
+
+
+        <!-- ======================================================== -->
+        <!-- SECTION 2: CART & CASH ON DELIVERY (COD) CHECKOUT         -->
+        <!-- ======================================================== -->
+        <section id="section-cart" class="main-section space-y-8">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b pb-4 gap-2">
+                <div>
+                    <h2 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+                        <i class="fas fa-shopping-cart text-emerald-600"></i>
+                        <span>Shopping Cart & COD Checkout</span>
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-1">Review your selected items and complete your secure cash-on-delivery order.</p>
+                </div>
+                <button onclick="switchSection('store')" class="text-xs bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-4 py-2 rounded-xl transition">
+                    ← Continue Shopping
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                <!-- Left: Cart Items List -->
+                <div class="lg:col-span-2 space-y-4">
+                    <div id="cart-items-container" class="space-y-4">
+                        <!-- Dynamically populated cart items -->
+                    </div>
+
+                    <!-- Empty Cart Notice -->
+                    <div id="cart-empty-state" class="bg-white rounded-3xl p-12 text-center border border-slate-200 shadow-sm">
+                        <i class="fas fa-shopping-basket text-6xl text-slate-300 mb-4 animate-bounce"></i>
+                        <h3 class="text-xl font-bold text-slate-800">Your cart is currently empty</h3>
+                        <p class="text-sm text-slate-500 mt-1 mb-6">Explore our catalog and add items to begin your purchase.</p>
+                        <button onclick="switchSection('store')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-8 py-3 rounded-2xl shadow-lg transition">
+                            Explore Store Catalog
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right: COD Summary & Form Card -->
+                <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-xl h-fit space-y-6">
+                    <div>
+                        <h3 class="text-xl font-black text-slate-900">Order Summary</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Cash on Delivery (COD) Guarantee</p>
+                    </div>
+                    
+                    <div class="space-y-3 text-sm border-y py-4">
+                        <div class="flex justify-between text-slate-600 font-medium">
+                            <span>Items Subtotal:</span>
+                            <span class="font-bold text-slate-900" id="cart-subtotal-price">$0.00</span>
+                        </div>
+                        <div class="flex justify-between text-slate-600 font-medium">
+                            <span>Express Delivery:</span>
+                            <span class="text-emerald-600 font-bold uppercase text-xs bg-emerald-50 px-2 py-0.5 rounded">Free</span>
+                        </div>
+                        <div class="flex justify-between text-slate-600 font-medium">
+                            <span>Payment Method:</span>
+                            <span class="bg-amber-100 text-amber-800 text-xs px-2.5 py-1 rounded-lg font-bold">Cash on Delivery</span>
+                        </div>
+                        <div class="border-t pt-3 flex justify-between font-black text-lg text-slate-900">
+                            <span>Grand Total:</span>
+                            <span class="text-emerald-600" id="cart-grand-total">$0.00</span>
+                        </div>
+                    </div>
+
+                    <!-- COD Form -->
+                    <form id="cod-form" onsubmit="submitCODOrder(event)" class="space-y-4">
+                        <h4 class="text-xs font-black text-slate-700 uppercase tracking-wider">Delivery Destination Details:</h4>
+                        <div>
+                            <input type="text" id="cod-fullname" required placeholder="Full Receiver Name"
+                                   class="w-full px-4 py-3 text-sm border border-slate-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none bg-slate-50">
+                        </div>
+                        <div>
+                            <input type="tel" id="cod-phonenum" required placeholder="Phone Number (e.g., +92 300 1234567)"
+                                   class="w-full px-4 py-3 text-sm border border-slate-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none bg-slate-50">
+                        </div>
+                        <div>
+                            <textarea id="cod-streetaddress" required rows="2" placeholder="Complete House/Street Address & City"
+                                      class="w-full px-4 py-3 text-sm border border-slate-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none bg-slate-50"></textarea>
+                        </div>
+
+                        <button type="submit" class="w-full bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black py-4 rounded-2xl shadow-xl transition flex items-center justify-center gap-2 transform hover:-translate-y-0.5">
+                            <i class="fas fa-truck-fast"></i>
+                            <span>Confirm COD Order Now</span>
+                        </button>
+                    </form>
+                    <p class="text-[11px] text-slate-400 text-center leading-relaxed">No upfront online payment required. Pay safely with cash upon delivery arrival.</p>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ======================================================== -->
+        <!-- SECTION 3: ORDER HISTORY & TRACKING                      -->
+        <!-- ======================================================== -->
+        <section id="section-orders" class="main-section space-y-6 max-w-4xl mx-auto">
+            <div class="border-b pb-4">
+                <h2 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+                    <i class="fas fa-clipboard-list text-amber-500"></i>
+                    <span>Your Order History & Live Status</span>
+                </h2>
+                <p class="text-xs text-slate-500 mt-1">Track all your placed cash-on-delivery orders in real-time.</p>
+            </div>
+
+            <div id="orders-container" class="space-y-4">
+                <!-- Dynamically populated orders list -->
+                <div class="bg-white rounded-3xl p-10 text-center border border-slate-200 shadow-sm">
+                    <i class="fas fa-box-open text-5xl text-slate-300 mb-3"></i>
+                    <p class="font-bold text-slate-700">No orders placed yet.</p>
+                    <p class="text-xs text-slate-400 mt-1">Your confirmed orders will appear right here.</p>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ======================================================== -->
+        <!-- SECTION 4: INTELLIGENT GEMINI AI ASSISTANT               -->
+        <!-- ======================================================== -->
+        <section id="section-ai" class="main-section max-w-4xl mx-auto space-y-6">
+            <div class="bg-gradient-to-r from-slate-900 via-emerald-950 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-2xl flex items-center justify-between border border-emerald-900/40">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 bg-gradient-to-tr from-amber-400 to-amber-500 text-slate-950 rounded-2xl flex items-center justify-center text-2xl shadow-xl font-black">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl sm:text-2xl font-black">Sadiq Yousafzai AI Assistant</h2>
+                        <p class="text-xs text-emerald-200">Powered by advanced AI to help you find products, check specs, and manage orders.</p>
+                    </div>
+                </div>
+                <span class="hidden sm:inline-flex items-center gap-2 bg-emerald-500/20 text-emerald-300 text-xs px-3.5 py-1.5 rounded-full border border-emerald-400/30 font-bold">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                    <span>AI Online</span>
+                </span>
+            </div>
+
+            <!-- Chat Container -->
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-2xl flex flex-col h-[580px] overflow-hidden">
+                
+                <!-- Messages Box -->
+                <div id="ai-chat-box" class="flex-1 p-6 overflow-y-auto space-y-4 bg-slate-50/60">
+                    <div class="flex gap-3 max-w-[85%]">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-700 text-amber-300 flex items-center justify-center font-bold text-sm flex-shrink-0 shadow-md">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="bg-white border border-slate-200/80 p-4 rounded-3xl rounded-tl-none text-sm text-slate-800 leading-relaxed shadow-sm">
+                            السلام علیکم! میں آپ کا اسمارٹ شاپنگ اسسٹنٹ ہوں۔ آج میں آپ کی کون سی پروڈکٹ تلاش کرنے یا آرڈر دینے میں مدد کر سکتا ہوں؟
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Prompts Bar -->
+                <div class="p-3 px-6 bg-white border-t flex gap-2 overflow-x-auto text-xs">
+                    <button onclick="sendQuickAiPrompt('Best electronics available for purchase?')" class="bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 text-slate-700 font-semibold px-4 py-2 rounded-2xl whitespace-nowrap transition border shadow-sm">
+                        💡 Best Electronics
+                    </button>
+                    <button onclick="sendQuickAiPrompt('How does Cash on Delivery work here?')" class="bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 text-slate-700 font-semibold px-4 py-2 rounded-2xl whitespace-nowrap transition border shadow-sm">
+                        🚚 COD Information
+                    </button>
+                    <button onclick="sendQuickAiPrompt('Recommend top organic groceries')" class="bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 text-slate-700 font-semibold px-4 py-2 rounded-2xl whitespace-nowrap transition border shadow-sm">
+                        🌿 Organic Groceries
+                    </button>
+                </div>
+
+                <!-- Input Field & Send Button -->
+                <div class="p-4 bg-white border-t flex items-center gap-3">
+                    <input type="text" id="ai-user-input" onkeydown="if(event.key==='Enter') sendAiMessage()" placeholder="Type your query for Gemini AI..." 
+                           class="flex-1 px-5 py-3.5 border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-emerald-500 outline-none bg-slate-50 shadow-inner">
+                    <button onclick="sendAiMessage()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-7 py-3.5 rounded-2xl font-bold transition flex items-center gap-2 shadow-lg shadow-emerald-600/30">
+                        <span>Send</span>
+                        <i class="fas fa-paper-plane text-xs"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ======================================================== -->
+        <!-- SECTION 5: ACCOUNT & PROFILE                             -->
+        <!-- ======================================================== -->
+        <section id="section-account" class="main-section max-w-lg mx-auto py-4">
+            <div class="bg-white rounded-3xl shadow-2xl border border-slate-100 p-8">
+                <div class="text-center mb-6">
+                    <div class="w-16 h-16 bg-emerald-100 text-emerald-700 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl shadow-inner">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <h2 class="text-2xl font-black text-slate-950">Account Profile & Security</h2>
+                    <p class="text-xs text-slate-500 mt-1">Manage your signed-in customer profile</p>
+                </div>
+
+                <!-- Google 1-Click Login -->
+                <button onclick="loginWithGoogle()" class="w-full bg-white hover:bg-slate-50 text-slate-700 font-semibold py-3.5 px-4 rounded-2xl border border-slate-300 flex items-center justify-center space-x-3 transition shadow-sm mb-5 group">
+                    <svg class="w-5 h-5 group-hover:scale-110 transition" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                    </svg>
+                    <span>Continue with Google</span>
+                </button>
+
+                <!-- Active Profile Info Card -->
+                <div id="profile-active-box" class="p-5 bg-emerald-50 border border-emerald-200 rounded-2xl text-center space-y-3">
+                    <div class="w-12 h-12 bg-emerald-600 text-white rounded-full flex items-center justify-center mx-auto text-lg font-bold shadow">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <div>
+                        <p class="font-bold text-slate-900 text-sm">Active Customer Session</p>
+                        <p id="profile-user-email" class="text-xs text-emerald-700 font-semibold mt-0.5">customer@sadiqyousafzai.com</p>
+                    </div>
+                    <div class="flex gap-2 pt-2">
+                        <button onclick="switchSection('store')" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs py-3 rounded-xl font-bold transition shadow">Browse Store</button>
+                        <button onclick="showToast('Profile settings updated successfully', 'info')" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs py-3 px-4 rounded-xl font-bold transition">Settings</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <div id="product-modal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 relative shadow-2xl animate-fadeIn">
+            <button onclick="closeModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-700 text-lg w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 transition">
+                <i class="fas fa-times"></i>
+            </button>
+            <div id="modal-body-content">
+                <!-- Dynamic content -->
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-slate-950 text-slate-400 text-xs py-10 border-t border-slate-800 mt-auto">
+        <div class="max-w-7xl mx-auto px-6 text-center space-y-3">
+            <p class="font-bold text-white text-base">Sadiq Yousafzai • Professional Community E-Commerce Suite</p>
+            <p>100% Secure Cash on Delivery (COD) service available across all regions.</p>
+            <p class="text-emerald-400 font-medium pt-2">© 2026 Sadiq Yousafzai Inc. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Products Database
+        const catalogProducts = [
+            {
+                id: 1,
+                name: "Ultra Smart Watch Pro",
+                category: "electronics",
+                price: 49.99,
+                rating: 4.9,
+                image: "https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=500&auto=format&fit=crop&q=60",
+                desc: "AMOLED HD display, Bluetooth calling, precise heart rate monitoring, fitness tracking, and 7-day battery endurance.",
+                badge: "Best Seller"
+            },
+            {
+                id: 2,
+                name: "Wireless Active ANC Earbuds",
+                category: "electronics",
+                price: 29.99,
+                rating: 4.8,
+                image: "https://images.unsplash.com/photo-1600294037681-c80b4cb5b434?w=500&auto=format&fit=crop&q=60",
+                desc: "Active noise cancellation, immersive stereo acoustics, smart touch controls, and ultra-fast wireless charging case.",
+                badge: "Hot Deal"
+            },
+            {
+                id: 3,
+                name: "Handcrafted Artisan Kurta",
+                category: "fashion",
+                price: 39.50,
+                rating: 4.9,
+                image: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=500&auto=format&fit=crop&q=60",
+                desc: "Premium breathable pure cotton fabric with exquisite artisan thread embroidery for ultimate style and comfort.",
+                badge: "Artisan Pick"
+            },
+            {
+                id: 4,
+                name: "Pure Mountain Honey & Nuts (500g)",
+                category: "grocery",
+                price: 22.00,
+                rating: 5.0,
+                image: "https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?w=500&auto=format&fit=crop&q=60",
+                desc: "100% raw organic honey harvested sustainably from mountain wildflowers, paired with assorted premium dry fruits.",
+                badge: "Organic"
+            },
+            {
+                id: 5,
+                name: "Genuine Handcrafted Leather Footwear",
+                category: "crafts",
+                price: 45.00,
+                rating: 4.7,
+                image: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=500&auto=format&fit=crop&q=60",
+                desc: "Hand-stitched genuine leather sandals featuring ergonomic cushioned soles for lifelong durability and comfort.",
+                badge: "Handmade"
+            },
+            {
+                id: 6,
+                name: "Portable Mini Desk Fan & Power Bank",
+                category: "electronics",
+                price: 19.99,
+                rating: 4.6,
+                image: "https://images.unsplash.com/photo-1618941723615-331b0c06f6b0?w=500&auto=format&fit=crop&q=60",
+                desc: "Rechargeable 3-speed desk fan with integrated high-capacity battery bank for smart devices.",
+                badge: "Essential"
+            },
+            {
+                id: 7,
+                name: "Exclusive Sidr Honey Jar",
+                category: "grocery",
+                price: 26.50,
+                rating: 4.9,
+                image: "https://images.unsplash.com/photo-1587049352847-4a222e784d38?w=500&auto=format&fit=crop&q=60",
+                desc: "Grade-A Sidr honey prized for its rich amber texture and exceptional nutritional value.",
+                badge: "Top Rated"
+            },
+            {
+                id: 8,
+                name: "Embroidered Velvet Party Handbag",
+                category: "fashion",
+                price: 34.00,
+                rating: 4.8,
+                image: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=500&auto=format&fit=crop&q=60",
+                desc: "Luxurious handcrafted velvet evening bag featuring intricate gold zari needlework.",
+                badge: "Trending"
+            }
+        ];
+
+        // Global State
+        let appState = {
+            activeCategory: 'all',
+            searchQuery: '',
+            cart: [],
+            orders: []
+        };
+
+        // Window Initialization
+        window.onload = function() {
+            renderStoreProducts();
+            updateCartInterface();
+        };
+
+        // Section Switcher
+        function switchSection(sectionId) {
+            document.querySelectorAll('.main-section').forEach(sec => {
+                sec.classList.remove('active');
+            });
+            const target = document.getElementById(`section-${sectionId}`);
+            if (target) {
+                target.classList.add('active');
+            }
+
+            document.querySelectorAll('.nav-tab').forEach(btn => {
+                btn.classList.remove('bg-emerald-600', 'text-white', 'font-bold');
+                btn.classList.add('text-slate-300', 'hover:bg-slate-900');
+            });
+
+            const activeTab = document.getElementById(`tab-btn-${sectionId}`);
+            if (activeTab) {
+                activeTab.classList.remove('text-slate-300', 'hover:bg-slate-900');
+                activeTab.classList.add('bg-emerald-600', 'text-white', 'font-bold');
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function scrollToProducts() {
+            switchSection('store');
+            document.getElementById('product-anchor').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Render Store Products
+        function renderStoreProducts() {
+            const grid = document.getElementById('product-grid');
+            grid.innerHTML = '';
+
+            const filtered = catalogProducts.filter(p => {
+                const matchesCat = (appState.activeCategory === 'all' || p.category === appState.activeCategory);
+                const matchesSearch = p.name.toLowerCase().includes(appState.searchQuery.toLowerCase()) ||
+                                      p.desc.toLowerCase().includes(appState.searchQuery.toLowerCase());
+                return matchesCat && matchesSearch;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full text-center py-16 bg-white rounded-3xl border p-8 shadow-sm">
+                        <i class="fas fa-search text-5xl text-slate-300 mb-3"></i>
+                        <p class="font-bold text-lg text-slate-800">No matching items found</p>
+                        <p class="text-xs text-slate-500 mt-1">Try another search keyword or category filter.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            filtered.forEach(product => {
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-2xl transition-all duration-300 flex flex-col overflow-hidden group";
+                card.innerHTML = `
+                    <div class="relative h-52 bg-slate-100 overflow-hidden cursor-pointer" onclick="openProductModal(${product.id})">
+                        <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='https://placehold.co/400x300/10b981/ffffff?text=Item'">
+                        <span class="absolute top-3 right-3 bg-amber-400 text-slate-950 font-black text-[11px] px-3 py-1 rounded-full shadow">
+                            ${product.badge}
+                        </span>
+                    </div>
+                    <div class="p-5 flex-1 flex flex-col justify-between space-y-4">
+                        <div>
+                            <div class="flex items-center justify-between text-xs text-slate-500 mb-1.5 font-medium">
+                                <span class="capitalize bg-slate-100 px-2.5 py-0.5 rounded-md">${product.category}</span>
+                                <span class="text-amber-500 font-bold"><i class="fas fa-star mr-1"></i>${product.rating}</span>
+                            </div>
+                            <h3 class="font-bold text-slate-900 text-base group-hover:text-emerald-600 transition cursor-pointer" onclick="openProductModal(${product.id})">
+                                ${product.name}
+                            </h3>
+                            <p class="text-xs text-slate-500 line-clamp-2 mt-1 leading-relaxed">${product.desc}</p>
+                        </div>
+                        <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+                            <div>
+                                <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider block">Price</span>
+                                <span class="text-lg font-black text-slate-900">$${product.price.toFixed(2)}</span>
+                            </div>
+                            <button onclick="addToCart(${product.id})" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-2xl font-bold transition flex items-center gap-1.5 shadow-md shadow-emerald-600/20">
+                                <i class="fas fa-cart-plus"></i>
+                                <span class="text-xs">Add</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function filterCategory(category) {
+            appState.activeCategory = category;
+            document.querySelectorAll('.cat-btn').forEach(btn => {
+                btn.classList.remove('bg-emerald-600', 'text-white');
+                btn.classList.add('bg-white', 'text-slate-700');
+            });
+            event.currentTarget.classList.remove('bg-white', 'text-slate-700');
+            event.currentTarget.classList.add('bg-emerald-600', 'text-white');
+            renderStoreProducts();
+        }
+
+        function handleGlobalSearch(query) {
+            appState.searchQuery = query;
+            renderStoreProducts();
+        }
+
+        // Product Modal Details
+        function openProductModal(id) {
+            const product = catalogProducts.find(p => p.id === id);
+            if (!product) return;
+
+            const modalBody = document.getElementById('modal-body-content');
+            modalBody.innerHTML = `
+                <div class="space-y-4">
+                    <img src="${product.image}" class="w-full h-60 object-cover rounded-2xl shadow-inner">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="bg-emerald-100 text-emerald-800 text-xs px-3 py-1 rounded-full font-bold">${product.badge}</span>
+                            <h2 class="text-xl font-black text-slate-900 mt-2">${product.name}</h2>
+                        </div>
+                        <span class="text-2xl font-black text-emerald-600">$${product.price.toFixed(2)}</span>
+                    </div>
+                    <p class="text-sm text-slate-600 leading-relaxed">${product.desc}</p>
+                    <div class="bg-slate-50 p-4 rounded-2xl border text-xs text-slate-600 space-y-1.5 font-medium">
+                        <p>✓ 100% Cash on Delivery available nationwide</p>
+                        <p>✓ Express doorstep delivery within 2-3 days</p>
+                        <p>✓ 7-day hassle-free return policy</p>
+                    </div>
+                    <button onclick="addToCart(${product.id}); closeModal(); switchSection('cart');" class="w-full bg-amber-400 hover:bg-amber-300 text-slate-950 font-black py-4 rounded-2xl shadow-xl transition">
+                        Add to Cart & Checkout
+                    </button>
+                </div>
+            `;
+            document.getElementById('product-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('product-modal').classList.add('hidden');
+        }
+
+        // Cart Management
+        function addToCart(productId) {
+            const item = appState.cart.find(i => i.id === productId);
+            if (item) {
+                item.qty++;
+            } else {
+                const prod = catalogProducts.find(p => p.id === productId);
+                appState.cart.push({ ...prod, qty: 1 });
+            }
+            updateCartInterface();
+            showToast("Item successfully added to cart!", "success");
+        }
+
+        function updateCartItemQty(id, delta) {
+            const item = appState.cart.find(i => i.id === id);
+            if (!item) return;
+            item.qty += delta;
+            if (item.qty <= 0) {
+                appState.cart = appState.cart.filter(i => i.id !== id);
+            }
+            updateCartInterface();
+        }
+
+        function removeCartItem(id) {
+            appState.cart = appState.cart.filter(i => i.id !== id);
+            updateCartInterface();
+            showToast("Item removed from cart", "info");
+        }
+
+        function updateCartInterface() {
+            const totalCount = appState.cart.reduce((sum, item) => sum + item.qty, 0);
+            document.getElementById('cart-badge').innerText = totalCount;
+
+            const container = document.getElementById('cart-items-container');
+            const emptyState = document.getElementById('cart-empty-state');
+
+            if (appState.cart.length === 0) {
+                container.innerHTML = '';
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                container.innerHTML = '';
+
+                appState.cart.forEach(item => {
+                    const row = document.createElement('div');
+                    row.className = "bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between gap-4";
+                    row.innerHTML = `
+                        <div class="flex items-center gap-4">
+                            <img src="${item.image}" class="w-16 h-16 object-cover rounded-xl border">
+                            <div>
+                                <h4 class="font-bold text-slate-800 text-sm">${item.name}</h4>
+                                <span class="text-xs text-emerald-600 font-bold">$${item.price.toFixed(2)}</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="flex items-center border border-slate-200 rounded-xl overflow-hidden bg-slate-50">
+                                <button onclick="updateCartItemQty(${item.id}, -1)" class="px-3 py-1.5 text-slate-600 hover:bg-slate-200 font-bold">-</button>
+                                <span class="px-3 text-xs font-bold text-slate-800">${item.qty}</span>
+                                <button onclick="updateCartItemQty(${item.id}, 1)" class="px-3 py-1.5 text-slate-600 hover:bg-slate-200 font-bold">+</button>
+                            </div>
+                            <button onclick="removeCartItem(${item.id})" class="text-rose-500 hover:text-rose-700 text-sm p-1.5 transition">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    `;
+                    container.appendChild(row);
+                });
+            }
+
+            const subtotal = appState.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            document.getElementById('cart-subtotal-price').innerText = `$${subtotal.toFixed(2)}`;
+            document.getElementById('cart-grand-total').innerText = `$${subtotal.toFixed(2)}`;
+        }
+
+        // COD Checkout Submission
+        function submitCODOrder(e) {
+            e.preventDefault();
+            if (appState.cart.length === 0) {
+                showToast("Your cart is empty!", "error");
+                return;
+            }
+
+            const name = document.getElementById('cod-fullname').value;
+            const phone = document.getElementById('cod-phonenum').value;
+            const address = document.getElementById('cod-streetaddress').value;
+
+            const newOrder = {
+                id: 'YUSUF-' + Math.floor(100000 + Math.random() * 900000),
+                items: [...appState.cart],
+                total: appState.cart.reduce((sum, item) => sum + (item.price * item.qty), 0),
+                customer: { name, phone, address },
+                date: new Date().toLocaleDateString(),
+                status: 'Processing (Cash on Delivery)'
+            };
+
+            appState.orders.unshift(newOrder);
+            appState.cart = [];
+            updateCartInterface();
+            renderOrdersList();
+
+            showToast(`Order #${newOrder.id} successfully confirmed!`, "success");
+            document.getElementById('cod-form').reset();
+            switchSection('orders');
+        }
+
+        // Render Orders
+        function renderOrdersList() {
+            const container = document.getElementById('orders-container');
+            if (appState.orders.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-white rounded-3xl p-10 text-center border border-slate-200 shadow-sm">
+                        <i class="fas fa-box-open text-5xl text-slate-300 mb-3"></i>
+                        <p class="font-bold text-slate-700">No orders placed yet.</p>
+                        <p class="text-xs text-slate-400 mt-1">Your confirmed orders will appear right here.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = '';
+            appState.orders.forEach(ord => {
+                const itemSummary = ord.items.map(i => `${i.name} (x${i.qty})`).join(', ');
+                const div = document.createElement('div');
+                div.className = "bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-3";
+                div.innerHTML = `
+                    <div class="flex justify-between items-center border-b pb-3">
+                        <div>
+                            <span class="font-black text-slate-900 text-sm">Order ID: ${ord.id}</span>
+                            <span class="text-xs text-slate-400 block">${ord.date}</span>
+                        </div>
+                        <span class="text-xs bg-emerald-100 text-emerald-800 font-bold px-3 py-1 rounded-full">${ord.status}</span>
+                    </div>
+                    <div class="text-xs text-slate-600 space-y-1">
+                        <p><strong class="text-slate-800">Items:</strong> ${itemSummary}</p>
+                        <p><strong class="text-slate-800">Receiver:</strong> ${ord.customer.name} (${ord.customer.phone})</p>
+                        <p><strong class="text-slate-800">Address:</strong> ${ord.customer.address}</p>
+                    </div>
+                    <div class="flex justify-between items-center pt-3 border-t font-bold text-sm">
+                        <span class="text-slate-500">Cash on Delivery Total:</span>
+                        <span class="text-emerald-600 text-base">$${ord.total.toFixed(2)}</span>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // Intelligent Gemini AI Assistant Integration
+        async function sendAiMessage() {
+            const inputEl = document.getElementById('ai-user-input');
+            const query = inputEl.value.trim();
+            if (!query) return;
+
+            appendChatMessage('user', query);
+            inputEl.value = '';
+
+            const loadingId = appendChatLoading();
+
+            try {
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+                const systemPrompt = `You are the highly intelligent, professional AI shopping assistant for "Sadiq Yousafzai". 
+Our product inventory includes: ${JSON.stringify(catalogProducts)}.
+Respond politely, intelligently, and concisely in English or Urdu as appropriate based on the user prompt. Help customers with product specs, recommendations, and cash on delivery instructions.`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: query }] }],
+                        systemInstruction: { parts: [{ text: systemPrompt }] }
+                    })
+                });
+
+                const result = await response.json();
+                removeChatLoading(loadingId);
+
+                let reply = "I am here to help! Please check our store catalog or let me know if you need assistance with your order.";
+                if (result.candidates && result.candidates[0]?.content?.parts[0]?.text) {
+                    reply = result.candidates[0].content.parts[0].text;
+                }
+
+                appendChatMessage('bot', reply);
+
+            } catch (err) {
+                console.error("AI Error:", err);
+                removeChatLoading(loadingId);
+                const fallback = generateSmartFallbackReply(query);
+                appendChatMessage('bot', fallback);
+            }
+        }
+
+        function sendQuickAiPrompt(promptText) {
+            document.getElementById('ai-user-input').value = promptText;
+            sendAiMessage();
+        }
+
+        function appendChatMessage(sender, text) {
+            const box = document.getElementById('ai-chat-box');
+            const div = document.createElement('div');
+
+            if (sender === 'user') {
+                div.className = "flex gap-3 justify-end max-w-[85%] ml-auto";
+                div.innerHTML = `
+                    <div class="bg-emerald-600 text-white p-4 rounded-3xl rounded-tr-none text-sm leading-relaxed shadow-md">
+                        ${text}
+                    </div>
+                `;
+            } else {
+                div.className = "flex gap-3 max-w-[85%]";
+                div.innerHTML = `
+                    <div class="w-10 h-10 rounded-2xl bg-emerald-700 text-amber-300 flex items-center justify-center font-bold text-sm flex-shrink-0 shadow-md">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="bg-white border border-slate-200/80 p-4 rounded-3xl rounded-tl-none text-sm text-slate-800 leading-relaxed shadow-sm">
+                        ${text.replace(/\n/g, '<br>')}
+                    </div>
+                `;
+            }
+
+            box.appendChild(div);
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function appendChatLoading() {
+            const box = document.getElementById('ai-chat-box');
+            const id = 'loading-' + Date.now();
+            const div = document.createElement('div');
+            div.id = id;
+            div.className = "flex gap-3 max-w-[85%]";
+            div.innerHTML = `
+                <div class="w-10 h-10 rounded-2xl bg-emerald-700 text-amber-300 flex items-center justify-center font-bold text-sm flex-shrink-0 shadow-md">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="bg-white border border-slate-200 p-4 rounded-3xl rounded-tl-none text-xs text-slate-500 flex items-center gap-2">
+                    <i class="fas fa-spinner fa-spin text-emerald-600"></i>
+                    <span>Gemini AI is thinking...</span>
+                </div>
+            `;
+            box.appendChild(div);
+            box.scrollTop = box.scrollHeight;
+            return id;
+        }
+
+        function removeChatLoading(id) {
+            const el = document.getElementById(id);
+            if (el) el.remove();
+        }
+
+        function generateSmartFallbackReply(query) {
+            const q = query.toLowerCase();
+            if (q.includes('cod') || q.includes('cash on delivery')) {
+                return "All orders on Sadiq Yousafzai support Cash on Delivery (COD). You simply pay the delivery courier in cash upon receiving your package at your doorstep.";
+            } else if (q.includes('electronics') || q.includes('watch')) {
+                return "We offer top electronics including the Ultra Smart Watch Pro ($49.99) and Wireless ANC Earbuds ($29.99). You can view them in the Store Catalog tab!";
+            } else {
+                return "Sadiq Yousafzai provides professional e-commerce with verified local merchants and cash-on-delivery. How else can I assist you today?";
+            }
+        }
+
+        // Authentication & Toast Utilities
+        function loginWithGoogle() {
+            showToast("Successfully signed in with Google!", "success");
+            switchSection('store');
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-msg');
+            const toastIcon = document.getElementById('toast-icon');
+
+            toastMsg.innerText = message;
+            if (type === 'success') {
+                toastIcon.className = "fas fa-check-circle text-emerald-400 text-lg";
+            } else {
+                toastIcon.className = "fas fa-info-circle text-blue-400 text-lg";
+            }
+
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
